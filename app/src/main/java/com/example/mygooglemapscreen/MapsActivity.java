@@ -40,6 +40,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
+                
                 LatLng latLng = mMap.getCameraPosition().target;
                 Geocoder geocoder = new Geocoder(MapsActivity.this);
                 try

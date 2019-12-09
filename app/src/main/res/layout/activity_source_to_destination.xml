@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#aaccdd"
+        android:gravity="bottom|center_vertical"
+        android:layout_marginTop="10dp">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/source"/>
+        <EditText
+            android:id="@+id/sourceAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Source Address"
+            android:textSize="16dp"
+            android:layout_marginLeft="5dp"
+            android:inputType="textMultiLine"
+            android:focusable="false"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#aaccdd"
+        android:gravity="bottom|center_vertical"
+        android:layout_marginTop="10dp">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/destination"/>
+        <EditText
+            android:id="@+id/destinationAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Destination Address"
+            android:textSize="16dp"
+            android:layout_marginLeft="5dp"
+            android:inputType="textMultiLine"
+            android:focusable="false"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/btnRoute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Route"
+        android:textColor="#ffffff"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"
+        android:textSize="16dp"/>
+</LinearLayout>

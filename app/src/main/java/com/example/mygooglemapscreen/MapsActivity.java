@@ -8,20 +8,24 @@ import android.widget.TextView;
 
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback//, GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMarkerClickListener {
+{
 
     public GoogleMap mMap;
     public TextView tvresult;
     public GoogleMap.OnCameraIdleListener onCameraIdleListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         tvresult = (TextView)findViewById(R.id.tvresult);
 
         configureCameraIdle();
+
     }
 
     public void configureCameraIdle()
@@ -41,8 +46,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCameraIdle() {
 
-                
+
                 LatLng latLng = mMap.getCameraPosition().target;
+                Log.i("Location = ",getClass().getSimpleName() +" = "+ String.format("Drag from %f:%f",latLng.latitude,latLng.longitude));
                 Geocoder geocoder = new Geocoder(MapsActivity.this);
                 try
                 {
@@ -69,11 +75,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnCameraIdleListener(onCameraIdleListener);
-        // Add a marker in Sydney and move the camera
-        /*LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
-
 
     }
+
+
 }

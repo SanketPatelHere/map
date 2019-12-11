@@ -27,9 +27,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import static android.content.Context.MODE_PRIVATE;
-
 public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> implements Filterable {
 
     private static final String TAG = "MyAdapter";
@@ -123,8 +121,8 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
             FindAutocompletePredictionsResponse findAutocompletePredictionsResponse = autocompletePredictions.getResult();
             if (findAutocompletePredictionsResponse != null)
                 for (com.google.android.libraries.places.api.model.AutocompletePrediction prediction : findAutocompletePredictionsResponse.getAutocompletePredictions()) {
-                    Log.i(TAG, prediction.getPlaceId());
-                    Log.i(TAG, prediction.getPrimaryText(null).toString());
+                    Log.i("My placeid = ", prediction.getPlaceId());
+                    Log.i("My primarytext ", prediction.getPrimaryText(null).toString());
 
                     resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString()));
 
@@ -132,6 +130,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
 
             return resultList;
         } else {
+            Log.i("My failure = ",resultList+"");
             return resultList;
         }
 

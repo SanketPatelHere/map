@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -79,7 +80,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         tvresult = (TextView) findViewById(R.id.tvresult);
         tvac = (AutoCompleteTextView)findViewById(R.id.tvac);
         tvac2 = (AutoCompleteTextView)findViewById(R.id.tvac2);
-        tvac3 = (AutoCompleteTextView)findViewById(R.id.tvac2);
+        tvac3 = (AutoCompleteTextView)findViewById(R.id.tvac3);
 
 
         lst = new ArrayList<>();
@@ -110,9 +111,12 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         tvac2.setAdapter(sourceadapter);
         tvac2.setTextColor(Color.RED);
         tvac2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String sourceaddress = tvac2.getText().toString();
+                tvac2.setSelection(0);
+
                 Log.i("My Source Address = ",sourceaddress);
                 Toast.makeText(SourceToDestination2.this, "sourceaddress = "+sourceaddress, Toast.LENGTH_SHORT).show();
             }
@@ -129,6 +133,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String destinationaddress = tvac3.getText().toString();
+                tvac3.setSelection(0);
                 Log.i("My Destination Address=",destinationaddress);
                 Toast.makeText(SourceToDestination2.this, "destination = "+destinationaddress, Toast.LENGTH_SHORT).show();
             }
@@ -160,41 +165,6 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             }
         });
 
-        /*if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), apiKey);
-        }
-        PlacesClient placesClient = Places.createClient(this);
-
-        AutocompleteSupportFragment autocompleteSupportFragment1 = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment1);
-        AutocompleteSupportFragment autocompleteSupportFragment2 = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment2);
-        autocompleteSupportFragment1.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
-        autocompleteSupportFragment1.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                placeName = place.toString();
-                myLatLng = place.getLatLng();
-                Log.i("My myLatLng1 = ", myLatLng+"");
-                Log.i("My Place1 = ", place.getName() + ", " + place.getId());
-            }
-
-            @Override
-            public void onError(Status status) {
-                Log.i("My Error1 = ", status + "");
-            }
-        });*/
-
-        /*autocompleteSupportFragment2.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
-        autocompleteSupportFragment2.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                Log.i("My Place2 = ",place.getName()+", "+place.getId());
-            }
-
-            @Override
-            public void onError(Status status) {
-                Log.i("My Error2 = ",status+"");
-            }
-        });*/
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync((OnMapReadyCallback) this);
@@ -224,10 +194,9 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             public void onCameraIdle() {
 
 
-                LatLng latLng = mMap.getCameraPosition().target;
+                LatLng latLng = mMap2.getCameraPosition().target;
                 //LatLng latLng = myLatLng;
-
-                Log.i("Location = ", getClass().getSimpleName() + " = " + String.format("Drag from %f:%f", latLng.latitude, latLng.longitude));
+                Log.i("My Location = ", getClass().getSimpleName() + " = " + String.format("Drag from %f:%f", latLng.latitude, latLng.longitude));
                 Geocoder geocoder = new Geocoder(SourceToDestination2.this);
                 try {
                     List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
@@ -271,6 +240,8 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API).build();
         mGoogleApiClient.connect();
+        Log.i("My mGoogleApiClient = ","connect");
+
     }
 
     @Override
@@ -283,6 +254,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
+            Log.i("My LocationServices = ","change");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, (LocationListener) this);
         }
 
@@ -306,14 +278,16 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         markerOptions.position(latLng);
         markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
+        mCurrLocationMarker = mMap2.addMarker(markerOptions);
 
         //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+        mMap2.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap2.animateCamera(CameraUpdateFactory.zoomTo(11));
+        Log.i("My location = ","animatecamera");
 
         //stop location updates
         if (mGoogleApiClient != null) {
+            Log.i("My location = ","update stop");
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
 

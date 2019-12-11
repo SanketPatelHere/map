@@ -64,7 +64,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     AutoCompleteTextView tvac2, tvac3;  //source, destination
     String s[] = {"c","c++","c#","java","jsp","android","php"};
     ArrayList<String> lst;
-
+    MyData listener;
     //second way
     private GoogleMap mMap2;
     Location mLastLocation;
@@ -97,7 +97,12 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         tvac.setAdapter(adapter);
         tvac.setTextColor(Color.RED);
 
-
+        listener = new MyData() {
+            @Override
+            public void getData(Object o1) {
+               Log.i("My data lat-long = ",o1+"");
+            }
+        };
         token = AutocompleteSessionToken.newInstance();
         SharedPreferences sp = getSharedPreferences("data",MODE_PRIVATE);
         sp.edit().putString("token",token+"").commit();
@@ -107,7 +112,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         RectangularBounds bounds = RectangularBounds.newInstance(
                 new LatLng(-33.880490, 151.184363),
                 new LatLng(-33.858754, 151.229596));
-        MyAdapter sourceadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds);
+        MyAdapter sourceadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds, listener);
         tvac2.setAdapter(sourceadapter);
         tvac2.setTextColor(Color.RED);
         tvac2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -126,7 +131,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         RectangularBounds bounds2 = RectangularBounds.newInstance(
                 new LatLng(-33.880490, 151.184363),
                 new LatLng(-33.858754, 151.229596));
-        MyAdapter destinationadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds2);
+        MyAdapter destinationadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds2, listener);
         tvac3.setAdapter(destinationadapter);
         tvac3.setTextColor(Color.RED);
         tvac3.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -2,6 +2,8 @@ package com.example.mygooglemapscreen;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
@@ -22,6 +25,7 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -31,16 +35,25 @@ import static android.content.Context.MODE_PRIVATE;
 public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> implements Filterable {
 
     private static final String TAG = "MyAdapter";
+    public MyData listener;
     private final PlacesClient placesClient;
     private RectangularBounds mBounds;
     private ArrayList<MyAdapter.PlaceAutocomplete> mResultList = new ArrayList<>();
     public Context context;
+    ArrayList<MyAdapter.PlaceAutocomplete> resultList;
 
     public MyAdapter(Context context, int resource, RectangularBounds bounds) {
         super(context, resource);
         this.context = context;
         mBounds = bounds;
         placesClient = com.google.android.libraries.places.api.Places.createClient(context);
+    }
+    public MyAdapter(Context context, int resource, RectangularBounds bounds, MyData listener) {
+        super(context, resource);
+        this.context = context;
+        mBounds = bounds;
+        placesClient = com.google.android.libraries.places.api.Places.createClient(context);
+        this.listener = listener;
     }
 
 
@@ -60,6 +73,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
         if (position != (mResultList.size() - 1)) {
             TextView autocompleteTextView = (TextView) view.findViewById(R.id.autocompleteText);
             autocompleteTextView.setText(mResultList.get(position)+"");
+            listener.getData(mResultList.get(position).l1);
             Log.i("My location1 = ",mResultList.get(position)+"");
         }
         else {
@@ -85,7 +99,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
 
     private ArrayList<MyAdapter.PlaceAutocomplete> getPredictions(CharSequence constraint) {
 
-        final ArrayList<MyAdapter.PlaceAutocomplete> resultList = new ArrayList<>();
+        resultList = new ArrayList<>();
 
         // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
         // and once again when the user makes a selection (for example when calling fetchPlace()).
@@ -124,8 +138,10 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
                     Log.i("My placeid = ", prediction.getPlaceId());
                     Log.i("My primarytext ", prediction.getPrimaryText(null).toString());
 
-                    resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString()));
-
+                    LatLng latlong = getLocationFromAddress(context, prediction.getFullText(null).toString());
+                    Log.i("My latlong ", latlong+"");
+                    //resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString()));
+                    resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString(), latlong));
                 }
 
             return resultList;
@@ -152,6 +168,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
                         results.values = mResultList;
                         results.count = mResultList.size();
                     }
+                    //Log.i("My Results = ",results.values+"");
                 }
                 return results;
             }
@@ -174,15 +191,44 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
 
         public CharSequence placeId;
         public CharSequence description;
-
+        public LatLng l1;
         PlaceAutocomplete(CharSequence placeId, CharSequence description) {
             this.placeId = placeId;
             this.description = description;
+        }
+        PlaceAutocomplete(CharSequence placeId, CharSequence description, LatLng l1) {
+            this.placeId = placeId;
+            this.description = description;
+            this.l1 = l1;
         }
 
         @Override
         public String toString() {
             return description.toString();
         }
+    }
+
+    public LatLng getLocationFromAddress(Context context,String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+
+            Address location = address.get(0);
+            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+        }
+
+        return p1;
     }
 }

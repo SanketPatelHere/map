@@ -30,14 +30,51 @@
             android:layout_height="wrap_content"
             android:text=""
             />
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#aaccdd"
+            android:gravity="bottom|center_vertical"
+            android:layout_marginTop="10dp">
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/source"/>
         <AutoCompleteTextView
             android:id="@+id/tvac2"
             android:background="#ddccaa"
+            android:hint="Source Address"
+            android:singleLine="true"
+            android:layout_gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text=""
             />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#aaccdd"
+            android:gravity="bottom|center_vertical"
+            android:layout_marginTop="10dp">
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/destination"/>
+            <AutoCompleteTextView
+                android:id="@+id/tvac3"
+                android:background="#ddccaa"
+                android:hint="Destination Address"
+                android:singleLine="true"
+                android:layout_gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                />
+        </LinearLayout>
     <Button
         android:id="@+id/btnFind"
         android:layout_width="match_parent"

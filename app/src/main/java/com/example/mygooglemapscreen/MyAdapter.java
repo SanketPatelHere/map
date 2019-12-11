@@ -1,6 +1,7 @@
 package com.example.mygooglemapscreen;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> implements Filterable {
 
@@ -58,7 +62,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
         if (position != (mResultList.size() - 1)) {
             TextView autocompleteTextView = (TextView) view.findViewById(R.id.autocompleteText);
             autocompleteTextView.setText(mResultList.get(position)+"");
-            Log.i("My source location = ",mResultList.get(position)+"");
+            Log.i("My location1 = ",mResultList.get(position)+"");
         }
         else {
             //ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
@@ -87,17 +91,21 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
 
         // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
         // and once again when the user makes a selection (for example when calling fetchPlace()).
-        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+        //AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+        SharedPreferences sp = context.getSharedPreferences("data", MODE_PRIVATE);
 
-
-        // Use the builder to create a FindAutocompletePredictionsRequest.
+        //String token = sp.getString("token","null");
+        AutocompleteSessionToken token1 = SourceToDestination2.token;
+        Log.i("My token = ",token1+"");
+        //AutocompleteSessionToken token1 = token;
+                // Use the builder to create a FindAutocompletePredictionsRequest.
         FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
                 // Call either setLocationBias() OR setLocationRestriction().
                 // .setLocationBias(bounds)
                 .setLocationBias(mBounds)
                 //.setCountry("au")
                 //   .setTypeFilter(TypeFilter.ADDRESS)
-                .setSessionToken(token)
+                .setSessionToken(token1)
                 .setQuery(constraint.toString())
                 .build();
 

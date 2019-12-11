@@ -11,19 +11,29 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#aaccdd">
+        <!--
     <fragment android:id="@+id/autocomplete_fragment1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-        />
-    <fragment android:id="@+id/autocomplete_fragment2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-        />
+        />-->
+        <fragment
+            android:id="@+id/place_autocomplete_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+            />
 
         <AutoCompleteTextView
             android:id="@+id/tvac"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            />
+
+        <AutoCompleteTextView
+            android:id="@+id/tvac2"
+            android:background="#ddccaa"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text=""

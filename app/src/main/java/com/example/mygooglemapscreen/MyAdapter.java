@@ -127,9 +127,13 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
         // This method should have been called off the main UI thread. Block and wait for at most
         // 60s for a result from the API.
         try {
-            Tasks.await(autocompletePredictions, 60, TimeUnit.SECONDS);
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            e.printStackTrace();
+            Tasks.await(autocompletePredictions);
+            //Tasks.await(autocompletePredictions, 60, TimeUnit.SECONDS);
+
+        }
+        catch (Exception e){
+        //catch (ExecutionException | InterruptedException | TimeoutException e) {
+            Log.i("My Error = ","in prediction "+e);
         }
 
         if (autocompletePredictions.isSuccessful()) {

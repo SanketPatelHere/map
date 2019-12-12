@@ -43,13 +43,31 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.DirectionsStep;
+import com.google.maps.model.EncodedPolyline;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -71,8 +89,9 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     MyData listener, listener2;
 
     //for source to destination
+    private Polyline mPolyline;
     LatLng sourceLatLong, destinationLatLong;
-    Object o11, o22;
+    LatLng o11, o22;
     LatLng position;
     double latitude = 0;
     double longitude = 0;
@@ -138,10 +157,10 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         sp.edit().putString("token",token+"").commit();
 
         Places.initialize(this, getResources().getString(R.string.google_maps_key));
-        tvac2.setThreshold(3);
+        //tvac2.setThreshold(3);
         RectangularBounds bounds = RectangularBounds.newInstance(
-                new LatLng(-33.880490, 151.184363),
-                new LatLng(-33.858754, 151.229596));
+                new LatLng(23.63936, 68.14712),
+                new LatLng(28.20453, 97.34466));
         MyAdapter sourceadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds, listener);
         tvac2.setAdapter(sourceadapter);
         tvac2.setTextColor(Color.RED);
@@ -158,17 +177,25 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 o11 = sourceLatLong;
                 //googleMap.addMarker(new MarkerOptions().position(new LatLng(sourceLatLong.latitude, sourceLatLong.longitude)).title("Source Marker"));
                 MarkerOptions markerOptions = new MarkerOptions();
+                //for remove old marker
+                if (mCurrLocationMarker != null) {
+                    mCurrLocationMarker.remove();
+                }
                 markerOptions.position(sourceLatLong);
                 markerOptions.title("Source Position");
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
                 mCurrLocationMarker = mMapSource.addMarker(markerOptions);
+
+                //move map camera
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(o11));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
             }
         });
 
-        tvac3.setThreshold(3);
+        //tvac3.setThreshold(3);
         RectangularBounds bounds2 = RectangularBounds.newInstance(
-                new LatLng(-33.880490, 151.184363),
-                new LatLng(-33.858754, 151.229596));
+                new LatLng(23.63936, 68.14712),
+                new LatLng(28.20453, 97.34466));
         MyAdapter destinationadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds2, listener2);
         tvac3.setAdapter(destinationadapter);
         tvac3.setTextColor(Color.RED);
@@ -186,6 +213,10 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 o22 = destinationLatLong;
                 //googleMap.addMarker(new MarkerOptions().position(new LatLng(destinationLatLong.latitude, destinationLatLong.longitude)).title("Destination Marker"));
                 MarkerOptions markerOptions = new MarkerOptions();
+                //for remove old marker
+                /*if (mCurrLocationMarker != null) {
+                    mCurrLocationMarker.remove();
+                }*/
                 markerOptions.position(destinationLatLong);
                 markerOptions.title("Destination Position");
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -193,33 +224,6 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
 
             }
         });
-
-
-
-
-
-        PlaceAutocompleteFragment placeAutocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
-        AutocompleteFilter autocompleteFilter = new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES).build();
-
-        placeAutocompleteFragment.setFilter(autocompleteFilter);
-        placeAutocompleteFragment.setOnPlaceSelectedListener(new com.google.android.gms.location.places.ui.PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(com.google.android.gms.location.places.Place place) {
-                Toast.makeText(getApplicationContext(),place.getName().toString(),Toast.LENGTH_SHORT).show();
-                Log.i("My myLatLng1 = ", myLatLng+"");
-                Log.i("My Place1 = ", place.getName() + ", " + place.getId());
-
-            }
-
-            @Override
-            public void onError(Status status) {
-                Log.i("My Error1 = ", status + "");
-                Toast.makeText(getApplicationContext(),status.toString(),Toast.LENGTH_SHORT).show();
-
-            }
-        });
-
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync((OnMapReadyCallback) this);
@@ -230,11 +234,18 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         btnFind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String location = placeName;
-                if (location != null && !location.equals("")) {
-                    //new GeocoderTask().execute(location);
-                    //new Geocoder();
-                }
+
+
+                Log.i("My mMapSource = ", mMapSource + "");
+                Log.i("My mMapDestination = ", mMapDestination + "");
+                Log.i("My mMapSource2 = ", o11 + "");
+                Log.i("My mMapDestination2 = ", o22 + "");
+
+
+
+
+                //getting url of google direction api
+                drawRoute();
             }
         });
 
@@ -247,49 +258,9 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                //position = o1
-
-                //latitude = getIntent().getDoubleExtra("lat", 0);
-                //longitude = getIntent().getDoubleExtra("long", 0);
-                /*if(o11!=null) {
-
-                    latitude2 = 73.998;
-                    longitude2 = 22.4567;
-
-                    position = (LatLng) o11;
-                    MarkerOptions options = new MarkerOptions();
-                    options.position(position);
-                    options.title("Source location");
-                    try {
-                        Geocoder geocoder = new Geocoder(SourceToDestination2.this, Locale.getDefault());
-                        List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-                        String cityName = addresses.get(0).getAddressLine(0);
-                        String stateName = addresses.get(0).getAddressLine(1);
-                        String countryName = addresses.get(0).getAddressLine(2);
-                        Log.i("My CityName ", cityName);
-                        Log.i("My StateName ", stateName);
-                        Log.i("My CountryName ", countryName);
-
-                        googleMap.addMarker(options);
-                        googleMap.addMarker(options.position(new LatLng(latitude2, longitude2)));
-                        CameraUpdate updatePosition = CameraUpdateFactory.newLatLng(position);
-                        CameraUpdate updateZoom = CameraUpdateFactory.zoomTo(6);
-                        googleMap.moveCamera(updatePosition);
-                        googleMap.animateCamera(updateZoom);
-
-                    } catch (Exception e) {
-                        Log.i("My Exception = ", "in source map" + e);
-                        options.snippet("Latitude = " + latitude + ", Longitude = " + longitude);
-                    }
-
-                }*/
-                //else
-                {
 
                 LatLng latLng = mMap2.getCameraPosition().target;
                 Log.i("My latLng = ",latLng+"");
-
-
 
                 //LatLng latLng = myLatLng;
                 Log.i("My Location = ", getClass().getSimpleName() + " = " + String.format("Drag from %f:%f", latLng.latitude, latLng.longitude));
@@ -306,9 +277,8 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 } catch (Exception e) {
                     Log.i("My Exception", e + "");
                 }
-                }
-
             }
+
         };
     }
 
@@ -318,6 +288,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         mMap2 = googleMap;
         mMapSource = googleMap;
         mMapDestination = googleMap;
+
         mMap2.setOnCameraIdleListener(onCameraIdleListener);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -429,5 +400,192 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         }
 
         return p1;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private void drawRoute(){
+
+        // Getting URL to the Google Directions API
+        String url = getDirectionsUrl(o11, o22);
+
+        DownloadTask downloadTask = new DownloadTask();
+
+        // Start downloading json data from Google Directions API
+        downloadTask.execute(url);
+    }
+
+
+    private String getDirectionsUrl(LatLng origin,LatLng dest){
+
+        // Origin of route
+        String str_origin = "origin="+origin.latitude+","+origin.longitude;
+
+        // Destination of route
+        String str_dest = "destination="+dest.latitude+","+dest.longitude;
+
+        // Key
+        String key = "key=" + getString(R.string.google_maps_key);
+
+        // Building the parameters to the web service
+        String parameters = str_origin+"&amp;"+str_dest+"&amp;"+key;
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
+        Log.i("My url = ",url);
+        return url;
+    }
+
+    /** A method to download json data from url */
+    private String downloadUrl(String strUrl) throws IOException {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try{
+            URL url = new URL(strUrl);
+
+            // Creating an http connection to communicate with url
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            // Connecting to url
+            urlConnection.connect();
+
+            // Reading data from url
+            iStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb  = new StringBuffer();
+
+            String line = "";
+            while( ( line = br.readLine())  != null){
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+
+        }catch(Exception e){
+            Log.d("Exception on download", e.toString());
+        }finally{
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    /** A class to download data from Google Directions URL */
+    private class DownloadTask extends AsyncTask<String, Void, String> {
+
+        // Downloading data in non-ui thread
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try{
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+                Log.d("DownloadTask","DownloadTask : " + data);
+            }catch(Exception e){
+                Log.d("Background Task",e.toString());
+            }
+            return data;
+        }
+
+        // Executes in UI thread, after the execution of
+        // doInBackground()
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+        }
+    }
+
+    /** A class to parse the Google Directions in JSON format */
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>> >{
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try{
+                jObject = new JSONObject(jsonData[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points = null;
+            PolylineOptions lineOptions = null;
+
+            // Traversing through all the routes
+            for(int i=0;i<result.size();i++){
+                points = new ArrayList<LatLng>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for(int j=0;j<path.size();j++){
+                    HashMap<String,String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(8);
+                lineOptions.color(Color.RED);
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            if(lineOptions != null) {
+                if(mPolyline != null){
+                    mPolyline.remove();
+                }
+                mPolyline = mMap.addPolyline(lineOptions);
+
+            }else
+                Toast.makeText(getApplicationContext(),"No route is found", Toast.LENGTH_LONG).show();
+        }
     }
 }

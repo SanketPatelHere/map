@@ -17,17 +17,13 @@
         android:layout_height="wrap_content"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         />-->
-        <fragment
-            android:id="@+id/place_autocomplete_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-            />
+
 
         <AutoCompleteTextView
             android:id="@+id/tvac"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:text=""
             />
         <LinearLayout
@@ -38,17 +34,16 @@
             android:gravity="bottom|center_vertical"
             android:layout_marginTop="10dp">
             <ImageView
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="50dp"
                 android:src="@drawable/source"/>
         <AutoCompleteTextView
             android:id="@+id/tvac2"
-            android:background="#ddccaa"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
             android:hint="Source Address"
             android:singleLine="true"
             android:layout_gravity="center_vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text=""
             />
         </LinearLayout>
@@ -61,17 +56,16 @@
             android:gravity="bottom|center_vertical"
             android:layout_marginTop="10dp">
             <ImageView
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="50dp"
                 android:src="@drawable/destination"/>
             <AutoCompleteTextView
                 android:id="@+id/tvac3"
-                android:background="#ddccaa"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
                 android:hint="Destination Address"
                 android:singleLine="true"
                 android:layout_gravity="center_vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text=""
                 />
         </LinearLayout>
@@ -80,6 +74,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Find"
+        android:background="#aaddcc"
         android:textSize="25sp"
         />
     </LinearLayout>

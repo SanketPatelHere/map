@@ -1,12 +1,14 @@
 package com.example.mygooglemapscreen;
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -80,6 +82,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     Button btnFind;
     String placeName = "";
     public TextView tvresult;
+    String locality, country;
     public GoogleMap.OnCameraIdleListener onCameraIdleListener;
     LatLng myLatLng;
     AutoCompleteTextView tvac;
@@ -157,17 +160,22 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         sp.edit().putString("token",token+"").commit();
 
         Places.initialize(this, getResources().getString(R.string.google_maps_key));
+        configureCameraIdle();
+
         //tvac2.setThreshold(3);
         RectangularBounds bounds = RectangularBounds.newInstance(
                 new LatLng(23.63936, 68.14712),
                 new LatLng(28.20453, 97.34466));
         MyAdapter sourceadapter = new MyAdapter(this, R.layout.autocomplete_list_item, bounds, listener);
         tvac2.setAdapter(sourceadapter);
+        //tvac2.setText(locality+", "+country);
         tvac2.setTextColor(Color.RED);
         tvac2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
                 String sourceaddress = tvac2.getText().toString();
                 tvac2.setSelection(0);
                 sourceLatLong = getLocationFromAddress(getApplicationContext(), tvac2.getText().toString());
@@ -214,9 +222,10 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 //googleMap.addMarker(new MarkerOptions().position(new LatLng(destinationLatLong.latitude, destinationLatLong.longitude)).title("Destination Marker"));
                 MarkerOptions markerOptions = new MarkerOptions();
                 //for remove old marker
-                /*if (mCurrLocationMarker != null) {
+                if (mCurrLocationMarker != null) {
                     mCurrLocationMarker.remove();
-                }*/
+                }
+
                 markerOptions.position(destinationLatLong);
                 markerOptions.title("Destination Position");
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
@@ -242,15 +251,27 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 Log.i("My mMapDestination2 = ", o22 + "");
 
 
+                if(o11!=null && o22!=null)
+                {
+                /*String url = "http://maps.google.com/maps?saddr="+o11.latitude+","+o11.longitude
+                        +"&daddr=22.3045,70.7915";*/
+                String url = "http://maps.google.com/maps?saddr="+o11.latitude+","+o11.longitude
+                        +"&daddr="+ o22.latitude+","+o22.longitude;
+                Log.i("My url = ",url);
+                Toast.makeText(SourceToDestination2.this, "Url = "+url, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse(url));
+                startActivity(intent);
+                }
+
 
 
                 //getting url of google direction api
-                drawRoute();
+                //drawRoute();
             }
         });
 
 
-        configureCameraIdle();
 
     }
 
@@ -268,11 +289,30 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 try {
                     List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
                     if (addressList != null && addressList.size() > 0) {
-                        String locality = addressList.get(0).getAddressLine(0);
-                        String country = addressList.get(0).getCountryName();
+                        locality = addressList.get(0).getAddressLine(0);
+                        country = addressList.get(0).getCountryName();
                         if (!locality.isEmpty() && !country.isEmpty()) {
                             tvresult.setText("Location = " + locality + " , " + country);
                         }
+
+                        //new for bydefault source address
+                        tvac2.setText(locality+", "+country);
+                        LatLng p1 = new LatLng(latLng.latitude, latLng.longitude);
+                        o11 = p1;
+                        MarkerOptions markerOptions = new MarkerOptions();
+                        //for remove old marker
+                        /*if (mCurrLocationMarker != null) {
+                            mCurrLocationMarker.remove();
+                        }*/
+                        markerOptions.position(sourceLatLong);
+                        markerOptions.title("Default Source Position");
+                        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                        mCurrLocationMarker = mMapSource.addMarker(markerOptions);
+
+                        //move map camera
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(o11));
+                        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+
                     }
                 } catch (Exception e) {
                     Log.i("My Exception", e + "");
@@ -298,7 +338,8 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 buildGoogleApiClient();
                 mMap2.setMyLocationEnabled(true);
             }
-        } else {
+        }
+        else {
             buildGoogleApiClient();
             mMap2.setMyLocationEnabled(true);
         }

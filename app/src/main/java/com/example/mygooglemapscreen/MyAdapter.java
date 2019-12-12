@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -117,7 +118,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
                 // .setLocationBias(bounds)
                 .setLocationBias(mBounds)
                 //.setCountry("au")
-                //   .setTypeFilter(TypeFilter.ADDRESS)
+                .setTypeFilter(TypeFilter.ADDRESS)
                 .setSessionToken(token1)
                 .setQuery(constraint.toString())
                 .build();
@@ -127,8 +128,8 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
         // This method should have been called off the main UI thread. Block and wait for at most
         // 60s for a result from the API.
         try {
-            Tasks.await(autocompletePredictions);
-            //Tasks.await(autocompletePredictions, 60, TimeUnit.SECONDS);
+            //Tasks.await(autocompletePredictions);
+            Tasks.await(autocompletePredictions, 30, TimeUnit.SECONDS);
 
         }
         catch (Exception e){

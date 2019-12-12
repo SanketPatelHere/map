@@ -1,5 +1,6 @@
 package com.example.mygooglemapscreen;
 import android.Manifest;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -33,6 +34,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,9 +47,11 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class SourceToDestination2 extends FragmentActivity implements OnMapReadyCallback, LocationListener,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -65,8 +69,18 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     String s[] = {"c","c++","c#","java","jsp","android","php"};
     ArrayList<String> lst;
     MyData listener, listener2;
-    //second way
-    private GoogleMap mMap2;
+
+    //for source to destination
+    LatLng sourceLatLong, destinationLatLong;
+    Object o11, o22;
+    LatLng position;
+    double latitude = 0;
+    double longitude = 0;
+    double latitude2 = 0;
+    double longitude2 = 0;
+
+    //second way      //current, souce, destination
+    private GoogleMap mMap2, mMapSource, mMapDestination;
     Location mLastLocation;
     Marker mCurrLocationMarker;
     GoogleApiClient mGoogleApiClient;
@@ -99,14 +113,24 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
 
         listener = new MyData() {
             @Override
+            public void getData(String description, Object o1) {
+
+            }
+
+            @Override
             public void getData(Object o1) {
-               Log.i("My data1 lat-long = ",o1+"");
+
             }
         };
         listener2 = new MyData() {
             @Override
-            public void getData(Object o1) {
-                Log.i("My data2 lat-long = ",o1+"");
+            public void getData(String description, Object o2) {
+
+            }
+
+            @Override
+            public void getData(Object o2) {
+
             }
         };
         token = AutocompleteSessionToken.newInstance();
@@ -127,9 +151,17 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String sourceaddress = tvac2.getText().toString();
                 tvac2.setSelection(0);
-
+                sourceLatLong = getLocationFromAddress(getApplicationContext(), tvac2.getText().toString());
                 Log.i("My Source Address = ",sourceaddress);
+                Log.i("My Source latlong = ",sourceLatLong+"");
                 Toast.makeText(SourceToDestination2.this, "sourceaddress = "+sourceaddress, Toast.LENGTH_SHORT).show();
+                o11 = sourceLatLong;
+                //googleMap.addMarker(new MarkerOptions().position(new LatLng(sourceLatLong.latitude, sourceLatLong.longitude)).title("Source Marker"));
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(sourceLatLong);
+                markerOptions.title("Source Position");
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                mCurrLocationMarker = mMapSource.addMarker(markerOptions);
             }
         });
 
@@ -145,8 +177,20 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String destinationaddress = tvac3.getText().toString();
                 tvac3.setSelection(0);
+                destinationLatLong = getLocationFromAddress(getApplicationContext(), tvac3.getText().toString());
+
                 Log.i("My Destination Address=",destinationaddress);
+                Log.i("My Destination latlong=",destinationLatLong+"");
                 Toast.makeText(SourceToDestination2.this, "destination = "+destinationaddress, Toast.LENGTH_SHORT).show();
+
+                o22 = destinationLatLong;
+                //googleMap.addMarker(new MarkerOptions().position(new LatLng(destinationLatLong.latitude, destinationLatLong.longitude)).title("Destination Marker"));
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(destinationLatLong);
+                markerOptions.title("Destination Position");
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                mCurrLocationMarker = mMapDestination.addMarker(markerOptions);
+
             }
         });
 
@@ -203,9 +247,50 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
+                //position = o1
 
+                //latitude = getIntent().getDoubleExtra("lat", 0);
+                //longitude = getIntent().getDoubleExtra("long", 0);
+                /*if(o11!=null) {
+
+                    latitude2 = 73.998;
+                    longitude2 = 22.4567;
+
+                    position = (LatLng) o11;
+                    MarkerOptions options = new MarkerOptions();
+                    options.position(position);
+                    options.title("Source location");
+                    try {
+                        Geocoder geocoder = new Geocoder(SourceToDestination2.this, Locale.getDefault());
+                        List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                        String cityName = addresses.get(0).getAddressLine(0);
+                        String stateName = addresses.get(0).getAddressLine(1);
+                        String countryName = addresses.get(0).getAddressLine(2);
+                        Log.i("My CityName ", cityName);
+                        Log.i("My StateName ", stateName);
+                        Log.i("My CountryName ", countryName);
+
+                        googleMap.addMarker(options);
+                        googleMap.addMarker(options.position(new LatLng(latitude2, longitude2)));
+                        CameraUpdate updatePosition = CameraUpdateFactory.newLatLng(position);
+                        CameraUpdate updateZoom = CameraUpdateFactory.zoomTo(6);
+                        googleMap.moveCamera(updatePosition);
+                        googleMap.animateCamera(updateZoom);
+
+                    } catch (Exception e) {
+                        Log.i("My Exception = ", "in source map" + e);
+                        options.snippet("Latitude = " + latitude + ", Longitude = " + longitude);
+                    }
+
+                }*/
+                //else
+                {
 
                 LatLng latLng = mMap2.getCameraPosition().target;
+                Log.i("My latLng = ",latLng+"");
+
+
+
                 //LatLng latLng = myLatLng;
                 Log.i("My Location = ", getClass().getSimpleName() + " = " + String.format("Drag from %f:%f", latLng.latitude, latLng.longitude));
                 Geocoder geocoder = new Geocoder(SourceToDestination2.this);
@@ -221,6 +306,8 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 } catch (Exception e) {
                     Log.i("My Exception", e + "");
                 }
+                }
+
             }
         };
     }
@@ -229,6 +316,8 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap2 = googleMap;
+        mMapSource = googleMap;
+        mMapDestination = googleMap;
         mMap2.setOnCameraIdleListener(onCameraIdleListener);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -284,15 +373,22 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             mCurrLocationMarker.remove();
         }
         //Place current location marker
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng latLng2 = new LatLng(location.getLatitude(), location.getLongitude());
+        Log.i("My latLng2 = ",latLng2+"");
+
+        if(o11!=null)
+                {
+                    latLng2 = (LatLng) o11;
+                    Log.i("My new latLng2 = ",latLng2+"");
+                }
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
+        markerOptions.position(latLng2);
         markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = mMap2.addMarker(markerOptions);
 
         //move map camera
-        mMap2.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap2.moveCamera(CameraUpdateFactory.newLatLng(latLng2));
         mMap2.animateCamera(CameraUpdateFactory.zoomTo(11));
         Log.i("My location = ","animatecamera");
 
@@ -307,5 +403,31 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+
+
+    public LatLng getLocationFromAddress(Context context, String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+
+            Address location = address.get(0);
+            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+        }
+
+        return p1;
     }
 }

@@ -74,6 +74,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
             TextView autocompleteTextView = (TextView) view.findViewById(R.id.autocompleteText);
             autocompleteTextView.setText(mResultList.get(position)+"");
             listener.getData(mResultList.get(position).l1);
+            //listener.getData(mResultList.get(position).description+"", mResultList.get(position).l1);
             Log.i("My location1 = ",mResultList.get(position)+"");
         }
         else {
@@ -137,11 +138,8 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
                 for (com.google.android.libraries.places.api.model.AutocompletePrediction prediction : findAutocompletePredictionsResponse.getAutocompletePredictions()) {
                     Log.i("My placeid = ", prediction.getPlaceId());
                     Log.i("My primarytext ", prediction.getPrimaryText(null).toString());
-
-                    LatLng latlong = getLocationFromAddress(context, prediction.getFullText(null).toString());
-                    Log.i("My latlong ", latlong+"");
-                    //resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString()));
-                    resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString(), latlong));
+                    resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString()));
+                    //resultList.add(new MyAdapter.PlaceAutocomplete(prediction.getPlaceId(), prediction.getFullText(null).toString(), latlong));
                 }
 
             return resultList;
@@ -208,27 +206,5 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
         }
     }
 
-    public LatLng getLocationFromAddress(Context context,String strAddress) {
 
-        Geocoder coder = new Geocoder(context);
-        List<Address> address;
-        LatLng p1 = null;
-
-        try {
-            // May throw an IOException
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
-                return null;
-            }
-
-            Address location = address.get(0);
-            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
-
-        } catch (IOException ex) {
-
-            ex.printStackTrace();
-        }
-
-        return p1;
-    }
 }

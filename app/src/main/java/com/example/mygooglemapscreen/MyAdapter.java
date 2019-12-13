@@ -107,7 +107,7 @@ public class MyAdapter extends ArrayAdapter<MyAdapter.PlaceAutocomplete> impleme
         // and once again when the user makes a selection (for example when calling fetchPlace()).
         //AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
         SharedPreferences sp = context.getSharedPreferences("data", MODE_PRIVATE);
-
+        //or =get token
         //String token = sp.getString("token","null");
         AutocompleteSessionToken token1 = SourceToDestination2.token;
         Log.i("My token = ",token1+"");

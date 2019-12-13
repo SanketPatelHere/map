@@ -12,6 +12,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,6 +94,11 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
     ArrayList<String> lst;
     MyData listener, listener2;
 
+    Button clear1, clear2;
+    LinearLayout lvDistanceDuration;
+    TextView tvDistance, tvDuration;
+    String distance = "";
+    String duration = "";
     //for source to destination
     private Polyline mPolyline;
     LatLng sourceLatLong, destinationLatLong;
@@ -117,7 +125,15 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         tvac = (AutoCompleteTextView)findViewById(R.id.tvac);
         tvac2 = (AutoCompleteTextView)findViewById(R.id.tvac2);
         tvac3 = (AutoCompleteTextView)findViewById(R.id.tvac3);
+        clear1 = (Button) findViewById(R.id.clear1);
+        clear2 = (Button) findViewById(R.id.clear2);
+        lvDistanceDuration = (LinearLayout) findViewById(R.id.lvDistanceDuration);
+        tvDistance = (TextView) findViewById(R.id.tvDistance);
+        tvDuration = (TextView) findViewById(R.id.tvDuration);
 
+        clear1.setVisibility(View.INVISIBLE);
+        clear2.setVisibility(View.INVISIBLE);
+        lvDistanceDuration.setVisibility(View.INVISIBLE);
 
         lst = new ArrayList<>();
         lst.add("c");
@@ -170,11 +186,70 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         tvac2.setAdapter(sourceadapter);
         //tvac2.setText(locality+", "+country);
         tvac2.setTextColor(Color.RED);
+        tvac2.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(tvac2.length()!=0)
+                {
+                    clear1.setVisibility(View.VISIBLE);
+                    //clear2.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    clear1.setVisibility(View.GONE);
+                    //clear2.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        tvac3.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(tvac3.length()!=0)
+                {
+                    //clear1.setVisibility(View.VISIBLE);
+                    clear2.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    //clear1.setVisibility(View.GONE);
+                    clear2.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         tvac2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                if(tvac2.length()!=0)
+                {
+                    clear1.setVisibility(View.VISIBLE);
+                    //clear2.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    clear1.setVisibility(View.GONE);
+                    //clear2.setVisibility(View.GONE);
+                }
 
                 String sourceaddress = tvac2.getText().toString();
                 tvac2.setSelection(0);
@@ -210,6 +285,17 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         tvac3.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(tvac3.length()!=0)
+                {
+                    //clear1.setVisibility(View.VISIBLE);
+                    clear2.setVisibility(View.VISIBLE);
+
+                }
+                else
+                {
+                    //clear1.setVisibility(View.GONE);
+                    clear2.setVisibility(View.GONE);
+                }
                 String destinationaddress = tvac3.getText().toString();
                 tvac3.setSelection(0);
                 destinationLatLong = getLocationFromAddress(getApplicationContext(), tvac3.getText().toString());
@@ -231,6 +317,35 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 mCurrLocationMarker = mMapDestination.addMarker(markerOptions);
 
+                if(o11!=null && o22!=null)
+                {
+                    drawRoute();
+                    lvDistanceDuration.setVisibility(View.VISIBLE);
+                }
+
+            }
+        });
+        
+        clear1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(SourceToDestination2.this, "close1", Toast.LENGTH_SHORT).show();
+                tvac2.setText("");
+                tvDistance.setText("");
+                tvDuration.setText("");
+                lvDistanceDuration.setVisibility(View.GONE);
+                clear1.setVisibility(View.GONE);
+            }
+        });
+        clear2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(SourceToDestination2.this, "close2", Toast.LENGTH_SHORT).show();
+                tvac3.setText("");
+                tvDistance.setText("");
+                tvDuration.setText("");
+                lvDistanceDuration.setVisibility(View.GONE);
+                clear2.setVisibility(View.GONE);
             }
         });
         SupportMapFragment supportMapFragment = (SupportMapFragment)
@@ -255,19 +370,21 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 {
                 /*String url = "http://maps.google.com/maps?saddr="+o11.latitude+","+o11.longitude
                         +"&daddr=22.3045,70.7915";*/
-                String url = "http://maps.google.com/maps?saddr="+o11.latitude+","+o11.longitude
+                /*String url = "http://maps.google.com/maps?saddr="+o11.latitude+","+o11.longitude
                         +"&daddr="+ o22.latitude+","+o22.longitude;
                 Log.i("My url = ",url);
                 Toast.makeText(SourceToDestination2.this, "Url = "+url, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                         Uri.parse(url));
-                startActivity(intent);
+                startActivity(intent);*/
+
+
+                //or
+                //getting url of google direction api
+                drawRoute();
+                lvDistanceDuration.setVisibility(View.VISIBLE);
                 }
 
-
-
-                //getting url of google direction api
-                //drawRoute();
             }
         });
 
@@ -312,6 +429,11 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                         //move map camera
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(o11));
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+
+                        /*if(o11!=null && o22!=null)
+                        {
+                            drawRoute();
+                        }*/
 
                     }
                 } catch (Exception e) {
@@ -403,7 +525,10 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         mMap2.moveCamera(CameraUpdateFactory.newLatLng(latLng2));
         mMap2.animateCamera(CameraUpdateFactory.zoomTo(11));
         Log.i("My location = ","animatecamera");
-
+        /*if(o11!=null && o22!=null)
+        {
+            drawRoute();
+        }*/
         //stop location updates
         if (mGoogleApiClient != null) {
             Log.i("My location = ","update stop");
@@ -482,7 +607,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         String key = "key=" + getString(R.string.google_maps_key);
 
         // Building the parameters to the web service
-        String parameters = str_origin+"&amp;"+str_dest+"&amp;"+key;
+        String parameters = str_origin+"&"+str_dest+"&"+key;
 
         // Output format
         String output = "json";
@@ -490,7 +615,7 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
         Log.i("My url = ",url);
-        return url;
+        return url.replace("&amp;","");
     }
 
     /** A method to download json data from url */
@@ -545,9 +670,9 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
             try{
                 // Fetching the data from web service
                 data = downloadUrl(url[0]);
-                Log.d("DownloadTask","DownloadTask : " + data);
+                Log.d("My DownloadTask","DownloadTask : " + data);
             }catch(Exception e){
-                Log.d("Background Task",e.toString());
+                Log.d("My Background Task",e.toString());
             }
             return data;
         }
@@ -605,6 +730,17 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 for(int j=0;j<path.size();j++){
                     HashMap<String,String> point = path.get(j);
 
+                    if(j==0)
+                    {
+                        distance = (String)point.get("distance");
+                        continue;
+                    }
+                    else if(j==1)
+                    {
+                        duration = (String)point.get("duration");
+                        continue;
+                    }
+
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
@@ -617,6 +753,9 @@ public class SourceToDestination2 extends FragmentActivity implements OnMapReady
                 lineOptions.width(8);
                 lineOptions.color(Color.RED);
             }
+
+            tvDistance.setText("Distance = "+distance);
+            tvDuration.setText("Duration = "+duration);
 
             // Drawing polyline in the Google Map for the i-th route
             if(lineOptions != null) {
